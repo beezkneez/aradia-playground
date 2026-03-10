@@ -841,19 +841,8 @@ app.post("/api/scrape/groovio", async (req, res) => {
   res.json({ status: "started", message: "Groovio scrape started. Check /api/scrape/groovio/status for progress." });
 
   try {
-    const { getAuthCookies, fetchLeads } = require("./scraper/groovio-scraper");
-    const { cookies, authToken } = await getAuthCookies();
-    const leads = await fetchLeads(cookies, authToken);
-
-    const STATUS_MAP = {
-      "new-lead": "new",
-      "next-intake": "contacted",
-      "in-progress": "interested",
-      "trial-started": "trial",
-      "trial-completed": "trial",
-      "won": "converted",
-      "lost": "lost",
-    };
+    const { run, STATUS_MAP } = require("./scraper/groovio-scraper");
+    const leads = await run();
 
     let imported = 0, updated = 0;
     for (const lead of leads) {

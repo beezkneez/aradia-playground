@@ -1,17 +1,14 @@
 /**
  * Groovio Lead Scraper
- * Logs in via Puppeteer to get auth cookies, then hits the API directly
- * to pull all leads and sync them to aradia-playground's database.
+ * Uses Puppeteer to login and intercept API responses directly.
+ * No need to reverse-engineer auth headers — the React app handles it.
  */
 require("dotenv").config({ path: require("path").join(__dirname, "..", ".env") });
 const puppeteer = require("puppeteer");
 
 const GROOVIO_EMAIL = process.env.GROOVIO_EMAIL || "jud.beasley@gmail.com";
 const GROOVIO_PASSWORD = process.env.GROOVIO_PASSWORD || "";
-const API_BASE = "https://groovio-cms.groovio.com.au/api/v1";
-const PLAYGROUND_API = process.env.PLAYGROUND_URL || "http://localhost:3002";
 
-// Status mapping from Groovio internal names to our pipeline
 const STATUS_MAP = {
   "new-lead": "new",
   "next-intake": "contacted",
@@ -22,160 +19,136 @@ const STATUS_MAP = {
   "lost": "lost",
 };
 
-async function getAuthCookies() {
-  console.log("Launching browser for authentication...");
+async function run() {
+  if (!GROOVIO_PASSWORD) throw new Error("GROOVIO_PASSWORD not set in environment");
+
+  console.log("Launching browser...");
   const browser = await puppeteer.launch({
     headless: "new",
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+    ],
   });
 
-  const page = await browser.newPage();
-
-  // Capture the auth token from API responses
-  let authToken = null;
-  page.on('request', (request) => {
-    const headers = request.headers();
-    if (headers.authorization && request.url().includes('groovio-cms')) {
-      authToken = headers.authorization;
-    }
-  });
-
-  await page.goto("https://groovio.com.au/login", { waitUntil: "networkidle2", timeout: 30000 });
-  await new Promise(r => setTimeout(r, 2000));
-
-  // Fill login form
-  await page.click('#email');
-  await page.keyboard.type(GROOVIO_EMAIL, { delay: 20 });
-  await page.click('#password');
-  await page.keyboard.type(GROOVIO_PASSWORD, { delay: 20 });
-  await page.keyboard.press('Enter');
-
-  // Wait for login to complete
-  await new Promise(r => setTimeout(r, 8000));
-
-  const currentUrl = page.url();
-  if (currentUrl.includes('login')) {
-    // Check for 2FA
-    const pageText = await page.evaluate(() => document.body.innerText);
-    if (pageText.includes('OTP') || pageText.includes('verification') || pageText.includes('code')) {
-      console.log("2FA detected! Please enter the code manually...");
-      // Wait longer for manual 2FA entry
-      await new Promise(r => setTimeout(r, 60000));
-    } else {
-      throw new Error("Login failed - still on login page");
-    }
-  }
-
-  // Navigate to leads to capture auth token
-  await page.goto("https://groovio.com.au/leads", { waitUntil: "networkidle2", timeout: 30000 });
-  await new Promise(r => setTimeout(r, 3000));
-
-  // Get cookies
-  const cookies = await page.cookies();
-
-  // Also get localStorage tokens
-  const storage = await page.evaluate(() => {
-    const items = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      items[key] = localStorage.getItem(key);
-    }
-    return items;
-  });
-
-  await browser.close();
-
-  return { cookies, authToken, storage };
-}
-
-async function fetchLeads(cookies, authToken) {
-  console.log("Fetching leads from Groovio API...");
-  const allLeads = [];
-  let page = 1;
-  let hasNext = true;
-
-  // Build cookie string
-  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ');
-
-  while (hasNext) {
-    const url = `${API_BASE}/studio_leads/${page > 1 ? '?page=' + page : ''}`;
-    console.log(`  Fetching page ${page}...`);
-
-    const headers = {
-      'Cookie': cookieStr,
-      'Accept': 'application/json',
-      'Referer': 'https://groovio.com.au/leads',
-      'Origin': 'https://groovio.com.au',
-    };
-    if (authToken) headers['Authorization'] = authToken;
-
-    const res = await fetch(url, { headers });
-    const data = await res.json();
-
-    if (data.results) {
-      allLeads.push(...data.results);
-      hasNext = !!data.next;
-      page++;
-    } else {
-      hasNext = false;
-    }
-  }
-
-  console.log(`  Total leads fetched: ${allLeads.length}`);
-  return allLeads;
-}
-
-async function syncToPlayground(leads) {
-  console.log("Syncing leads to Aradia Marketing Hub...");
-
-  const mapped = leads.map(lead => ({
-    name: lead.name || '',
-    email: lead.email || '',
-    phone: lead.phone || '',
-    source: lead.source === 'student' ? 'groovio' : (lead.source || 'groovio'),
-    location: '',  // Groovio doesn't seem to include location per lead
-    notes: lead.notes || '',
-    status: STATUS_MAP[lead.status] || 'new',
-  }));
-
-  // Send in batches of 100
-  const batchSize = 100;
-  let totalImported = 0;
-  for (let i = 0; i < mapped.length; i += batchSize) {
-    const batch = mapped.slice(i, i + batchSize);
-    try {
-      const res = await fetch(`${PLAYGROUND_API}/api/leads/import`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ leads: batch }),
-      });
-      const result = await res.json();
-      totalImported += result.imported || 0;
-      console.log(`  Batch ${Math.floor(i/batchSize) + 1}: imported ${result.imported} leads`);
-    } catch (err) {
-      console.error(`  Batch error:`, err.message);
-    }
-  }
-
-  console.log(`\nSync complete! Total imported: ${totalImported} / ${leads.length}`);
-  return totalImported;
-}
-
-async function run() {
   try {
-    const { cookies, authToken } = await getAuthCookies();
-    const leads = await fetchLeads(cookies, authToken);
-    const imported = await syncToPlayground(leads);
-    console.log(`\nDone! ${imported} leads synced to Marketing Hub.`);
-  } catch (err) {
-    console.error("Scraper error:", err.message);
-    process.exit(1);
+    const page = await browser.newPage();
+
+    // Set a real user agent
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36');
+
+    // Collect lead data from intercepted API responses
+    const allLeads = [];
+    let leadsPromiseResolve;
+    let pagesReceived = 0;
+    let totalExpected = 0;
+
+    page.on('response', async (response) => {
+      const url = response.url();
+      if (url.includes('studio_leads') && !url.includes('new_leads_count') && !url.includes('column_names') && response.request().method() === 'GET') {
+        try {
+          const data = await response.json();
+          if (data.results) {
+            allLeads.push(...data.results);
+            pagesReceived++;
+            totalExpected = data.count || totalExpected;
+            console.log(`  Captured page ${pagesReceived}: ${data.results.length} leads (total: ${allLeads.length}/${totalExpected})`);
+          }
+        } catch (e) { /* ignore non-JSON responses */ }
+      }
+    });
+
+    // Login
+    console.log("Navigating to login...");
+    await page.goto("https://groovio.com.au/login", { waitUntil: "networkidle2", timeout: 30000 });
+    await new Promise(r => setTimeout(r, 2000));
+
+    console.log("Filling credentials...");
+    await page.click('#email');
+    await page.keyboard.type(GROOVIO_EMAIL, { delay: 15 });
+    await page.click('#password');
+    await page.keyboard.type(GROOVIO_PASSWORD, { delay: 15 });
+    await page.keyboard.press('Enter');
+
+    // Wait for login redirect
+    console.log("Waiting for login...");
+    await new Promise(r => setTimeout(r, 8000));
+
+    if (page.url().includes('login')) {
+      // Check for error
+      const pageText = await page.evaluate(() => document.body.innerText.substring(0, 500));
+      throw new Error(`Login failed. Page URL: ${page.url()}. Content: ${pageText.substring(0, 200)}`);
+    }
+
+    console.log("Login successful! URL:", page.url());
+
+    // Navigate to leads page — this triggers the API calls
+    console.log("Navigating to leads page...");
+    await page.goto("https://groovio.com.au/leads", { waitUntil: "networkidle2", timeout: 30000 });
+    await new Promise(r => setTimeout(r, 5000));
+
+    // The leads page loads page 1 automatically.
+    // If there are more pages, we need to trigger pagination.
+    // Check if we got all leads
+    if (allLeads.length < totalExpected) {
+      console.log(`Got ${allLeads.length}/${totalExpected}. Fetching remaining pages via scrolling/pagination...`);
+
+      // Try to click "next page" or scroll to load more
+      // First, let's see if there's a pagination control
+      const hasNextPage = await page.evaluate(() => {
+        const nextBtn = document.querySelector('.ant-pagination-next:not(.ant-pagination-disabled)');
+        return !!nextBtn;
+      });
+
+      if (hasNextPage) {
+        while (allLeads.length < totalExpected) {
+          const before = allLeads.length;
+          await page.evaluate(() => {
+            const nextBtn = document.querySelector('.ant-pagination-next:not(.ant-pagination-disabled)');
+            if (nextBtn) nextBtn.click();
+          });
+          await new Promise(r => setTimeout(r, 3000));
+          if (allLeads.length === before) break; // No new data, stop
+        }
+      } else {
+        // Try direct API calls using the browser's auth context
+        console.log("No pagination UI found. Using page.evaluate to fetch remaining pages...");
+        let pageNum = 2;
+        while (allLeads.length < totalExpected) {
+          const moreLeads = await page.evaluate(async (pageNum) => {
+            try {
+              const res = await fetch(`https://groovio-cms.groovio.com.au/api/v1/studio_leads/?page=${pageNum}`);
+              const data = await res.json();
+              return data.results || [];
+            } catch (e) { return []; }
+          }, pageNum);
+
+          if (moreLeads.length === 0) break;
+          allLeads.push(...moreLeads);
+          console.log(`  Fetched page ${pageNum}: ${moreLeads.length} leads (total: ${allLeads.length}/${totalExpected})`);
+          pageNum++;
+        }
+      }
+    }
+
+    console.log(`\nTotal leads captured: ${allLeads.length}`);
+    return allLeads;
+
+  } finally {
+    await browser.close();
   }
 }
 
-// Export for use as module or run directly
 if (require.main === module) {
-  run();
+  run().then(leads => {
+    console.log(`Done! ${leads.length} leads fetched.`);
+    if (leads[0]) console.log("Sample:", JSON.stringify(leads[0], null, 2));
+  }).catch(err => {
+    console.error("Failed:", err.message);
+    process.exit(1);
+  });
 } else {
-  module.exports = { getAuthCookies, fetchLeads, syncToPlayground, run };
+  module.exports = { run, STATUS_MAP };
 }
