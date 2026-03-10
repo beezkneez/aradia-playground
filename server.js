@@ -235,6 +235,12 @@ async function setupDatabase() {
     )
   `);
 
+  // Add unique index on email for dedup (ignore nulls/empty)
+  await query(`CREATE UNIQUE INDEX IF NOT EXISTS leads_email_unique ON leads (email) WHERE email IS NOT NULL AND email != ''`).catch(()=>{});
+  // Add groovio_id column for tracking synced leads
+  await query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS groovio_id INTEGER`).catch(()=>{});
+  await query(`CREATE UNIQUE INDEX IF NOT EXISTS leads_groovio_id_unique ON leads (groovio_id) WHERE groovio_id IS NOT NULL`).catch(()=>{});
+
   console.log("Database tables ready ✅");
 }
 
@@ -298,16 +304,40 @@ app.delete("/api/leads/:id", async (req, res) => {
 app.post("/api/leads/import", async (req, res) => {
   try {
     const { leads } = req.body;
-    let imported = 0;
+    let imported = 0, updated = 0, skipped = 0;
     for (const lead of leads) {
-      await query(
-        `INSERT INTO leads (name, email, phone, source, location, notes)
-         VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING`,
-        [lead.name, lead.email, lead.phone, lead.source || 'import', lead.location, lead.notes]
-      );
-      imported++;
+      if (!lead.email && !lead.name) { skipped++; continue; }
+      if (lead.groovio_id) {
+        // Upsert by groovio_id
+        const result = await query(
+          `INSERT INTO leads (name, email, phone, source, status, location, notes, groovio_id)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+           ON CONFLICT (groovio_id) DO UPDATE SET
+             name=EXCLUDED.name, phone=EXCLUDED.phone, notes=EXCLUDED.notes,
+             status=EXCLUDED.status, updated_at=NOW()
+           RETURNING (xmax = 0) AS inserted`,
+          [lead.name, lead.email, lead.phone, lead.source || 'groovio', lead.status || 'new', lead.location, lead.notes, lead.groovio_id]
+        );
+        if (result.rows[0]?.inserted) imported++; else updated++;
+      } else if (lead.email) {
+        // Upsert by email
+        const result = await query(
+          `INSERT INTO leads (name, email, phone, source, location, notes)
+           VALUES ($1,$2,$3,$4,$5,$6)
+           ON CONFLICT ((email)) WHERE email IS NOT NULL AND email != '' DO NOTHING`,
+          [lead.name, lead.email, lead.phone, lead.source || 'import', lead.location, lead.notes]
+        );
+        imported++;
+      } else {
+        await query(
+          `INSERT INTO leads (name, phone, source, location, notes)
+           VALUES ($1,$2,$3,$4,$5)`,
+          [lead.name, lead.phone, lead.source || 'import', lead.location, lead.notes]
+        );
+        imported++;
+      }
     }
-    res.json({ imported });
+    res.json({ imported, updated, skipped });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -798,6 +828,67 @@ app.post("/api/email/send", async (req, res) => {
     await resend.emails.send({ from: CONFIG.FROM_EMAIL, to, subject, html });
     res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GROOVIO SCRAPER ────────────────────────
+let scrapeInProgress = false;
+
+app.post("/api/scrape/groovio", async (req, res) => {
+  if (scrapeInProgress) return res.status(409).json({ error: "Scrape already in progress" });
+  scrapeInProgress = true;
+
+  // Respond immediately, scrape runs in background
+  res.json({ status: "started", message: "Groovio scrape started. Check /api/scrape/groovio/status for progress." });
+
+  try {
+    const { getAuthCookies, fetchLeads } = require("./scraper/groovio-scraper");
+    const { cookies, authToken } = await getAuthCookies();
+    const leads = await fetchLeads(cookies, authToken);
+
+    const STATUS_MAP = {
+      "new-lead": "new",
+      "next-intake": "contacted",
+      "in-progress": "interested",
+      "trial-started": "trial",
+      "trial-completed": "trial",
+      "won": "converted",
+      "lost": "lost",
+    };
+
+    let imported = 0, updated = 0;
+    for (const lead of leads) {
+      if (!lead.email && !lead.name) continue;
+      try {
+        const result = await query(
+          `INSERT INTO leads (name, email, phone, source, status, notes, groovio_id)
+           VALUES ($1,$2,$3,'groovio',$4,$5,$6)
+           ON CONFLICT (groovio_id) DO UPDATE SET
+             name=EXCLUDED.name, phone=EXCLUDED.phone, notes=EXCLUDED.notes,
+             status=EXCLUDED.status, updated_at=NOW()
+           RETURNING (xmax = 0) AS inserted`,
+          [lead.name, lead.email, lead.phone, STATUS_MAP[lead.status] || 'new', lead.notes || '', lead.id]
+        );
+        if (result.rows[0]?.inserted) imported++; else updated++;
+      } catch (e) { /* skip dupes */ }
+    }
+
+    lastScrapeResult = { success: true, imported, updated, total: leads.length, completedAt: new Date().toISOString() };
+    console.log(`Groovio scrape complete: ${imported} new, ${updated} updated, ${leads.length} total`);
+  } catch (err) {
+    lastScrapeResult = { success: false, error: err.message, completedAt: new Date().toISOString() };
+    console.error("Groovio scrape failed:", err.message);
+  } finally {
+    scrapeInProgress = false;
+  }
+});
+
+let lastScrapeResult = null;
+
+app.get("/api/scrape/groovio/status", (req, res) => {
+  res.json({
+    inProgress: scrapeInProgress,
+    lastResult: lastScrapeResult,
+  });
 });
 
 // ── START ──────────────────────────────────
