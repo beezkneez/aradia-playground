@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aradia Marketing Hub</title>
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #242424;
+  --surface3: #2e2e2e;
+  --border: #333;
+  --text: #e8e8e8;
+  --text2: #999;
+  --accent: #c8a2c8;
+  --accent2: #a67fa6;
+  --success: #4caf50;
+  --warning: #ff9800;
+  --danger: #e53935;
+  --info: #42a5f5;
+  --purple: #9c27b0;
+  --gradient: linear-gradient(135deg, #2a1a2e 0%, #1a1a2e 100%);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.app-layout { display:flex; min-height:100vh; }
+.sidebar {
+  width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+}
+.sidebar-brand {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.sidebar-brand h1 {
+  font-size: 18px;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.sidebar-brand small { color: var(--text2); font-size: 11px; }
+.nav-section {
+  padding: 8px 12px 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text2);
+  margin-top: 8px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.15s;
+  font-size: 14px;
+  border-left: 3px solid transparent;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+  background: var(--surface2);
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+.nav-icon { width:18px; text-align:center; font-size:15px; }
+
+/* ── MAIN CONTENT ── */
+.main-content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 24px 32px;
+  max-width: 1400px;
+}
+.page { display: none; }
+.page.active { display: block; }
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.page-header h2 { font-size: 24px; font-weight: 600; }
+
+/* ── CARDS / PANELS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card h3 { font-size: 16px; margin-bottom: 12px; color: var(--accent); }
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+.stat-card .stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.stat-card .stat-label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-secondary { background: var(--surface3); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { opacity: 0.85; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── FORMS ── */
+input, select, textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  width: 100%;
+  font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+textarea { min-height: 80px; resize: vertical; }
+label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 4px; }
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.form-group { margin-bottom: 12px; }
+
+/* ── TOGGLE (from CLAUDE.md) ── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+.admin-toggle { position:relative; display:inline-block; width:44px; height:24px; }
+.admin-toggle input { opacity:0; width:0; height:0; }
+.admin-toggle .slider {
+  position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0;
+  background:#555; border-radius:24px; transition:0.3s;
+}
+.admin-toggle .slider::before {
+  content:""; position:absolute; height:18px; width:18px; left:3px; bottom:3px;
+  background:white; border-radius:50%; transition:0.3s;
+}
+.admin-toggle input:checked + .slider { background:var(--accent); }
+.admin-toggle input:checked + .slider::before { transform:translateX(20px); }
+
+/* ── TABLE ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table tr:hover td { background: var(--surface2); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-new { background: #1e3a5f; color: #42a5f5; }
+.badge-contacted { background: #3e2723; color: #ff9800; }
+.badge-interested { background: #1b5e20; color: #66bb6a; }
+.badge-trial { background: #4a148c; color: #ce93d8; }
+.badge-converted { background: #1b5e20; color: #4caf50; }
+.badge-lost { background: #3e2723; color: #e53935; }
+.badge-active { background: #1b5e20; color: #4caf50; }
+.badge-inactive { background: #333; color: #999; }
+.badge-draft { background: #333; color: #999; }
+.badge-sent { background: #1e3a5f; color: #42a5f5; }
+.badge-planned { background: #333; color: #999; }
+.badge-published { background: #1b5e20; color: #4caf50; }
+.badge-pending { background: #3e2723; color: #ff9800; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.modal h3 { margin-bottom: 16px; font-size: 18px; }
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* ── FUNNEL ── */
+.funnel-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.funnel-bar .label { width: 100px; font-size: 13px; text-transform: capitalize; }
+.funnel-bar .bar-bg {
+  flex: 1;
+  background: var(--surface2);
+  border-radius: 6px;
+  height: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.funnel-bar .bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  background: var(--accent);
+  transition: width 0.4s;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000;
+  min-width: fit-content;
+}
+
+/* ── CALENDAR GRID ── */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.cal-header {
+  padding: 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+.cal-day {
+  min-height: 100px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.cal-day:hover { border-color: var(--accent); }
+.cal-day.other-month { opacity: 0.3; }
+.cal-day .day-num { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.cal-day.today .day-num { color: var(--accent); font-weight: 700; }
+.cal-event {
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-event.post { background: #1e3a5f; color: #42a5f5; }
+.cal-event.email { background: #4a148c; color: #ce93d8; }
+.cal-event.promo { background: #1b5e20; color: #66bb6a; }
+.cal-event.event { background: #3e2723; color: #ff9800; }
+
+/* ── STARS ── */
+.stars { color: #ff9800; letter-spacing: 2px; }
+.stars .empty { color: #555; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-bar input, .filter-bar select { width: auto; min-width: 150px; }
+
+/* ── EMAIL EDITOR ── */
+.email-editor {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.email-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.email-toolbar button {
+  padding: 4px 8px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.email-toolbar button:hover { background: var(--border); }
+.email-body-edit {
+  min-height: 200px;
+  padding: 16px;
+  outline: none;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── TABS WITHIN PAGES ── */
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 16px;
+}
+.tab-btn {
+  padding: 10px 20px;
+  cursor: pointer;
+  color: var(--text2);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-size: 13px;
+  transition: all 0.15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 9999;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .sidebar { width: 60px; }
+  .sidebar .nav-item span:not(.nav-icon) { display: none; }
+  .sidebar-brand h1 { font-size: 14px; }
+  .sidebar-brand small, .nav-section { display: none; }
+  .main-content { margin-left: 60px; padding: 16px; }
+  .nav-item { padding: 10px 0; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <h1>Aradia</h1>
+      <small>Marketing Hub</small>
+    </div>
+
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">&#9673;</span><span>Dashboard</span>
+    </div>
+
+    <div class="nav-section">Acquire</div>
+    <div class="nav-item" data-page="leads">
+      <span class="nav-icon">&#9733;</span><span>Leads</span>
+    </div>
+    <div class="nav-item" data-page="campaigns">
+      <span class="nav-icon">&#9993;</span><span>Campaigns</span>
+    </div>
+    <div class="nav-item" data-page="promos">
+      <span class="nav-icon">&#9881;</span><span>Promos</span>
+    </div>
+
+    <div class="nav-section">Engage</div>
+    <div class="nav-item" data-page="calendar">
+      <span class="nav-icon">&#9783;</span><span>Calendar</span>
+    </div>
+    <div class="nav-item" data-page="social">
+      <span class="nav-icon">&#9881;</span><span>Social Cards</span>
+    </div>
+
+    <div class="nav-section">Retain</div>
+    <div class="nav-item" data-page="members">
+      <span class="nav-icon">&#9829;</span><span>Members</span>
+    </div>
+    <div class="nav-item" data-page="retention">
+      <span class="nav-icon">&#9888;</span><span>Retention</span>
+    </div>
+    <div class="nav-item" data-page="referrals">
+      <span class="nav-icon">&#10003;</span><span>Referrals</span>
+    </div>
+
+    <div class="nav-section">Reputation</div>
+    <div class="nav-item" data-page="reviews">
+      <span class="nav-icon">&#9733;</span><span>Reviews</span>
+    </div>
+    <div class="nav-item" data-page="milestones">
+      <span class="nav-icon">&#127942;</span><span>Milestones</span>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- ═══════════════════════════════════ DASHBOARD ═══════════════════════════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h2>Marketing Dashboard</h2>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" onclick="loadDashboard()">Refresh</button>
+        </div>
+      </div>
+      <div class="stat-grid" id="dashboard-stats">
+        <div class="stat-card"><div class="stat-value" id="ds-total-leads">0</div><div class="stat-label">Total Leads</div></div>
+        <div class="stat-card"><div class="stat-value" id="ds-new-leads">0</div><div class="stat-label">New Leads</div></div>
+        <div class="stat-card"><div class="stat-value" id="ds-members">0</div><div class="stat-label">Active Members</div></div>
+        <div class="stat-card"><div class="stat-value" id="ds-campaigns">0</div><div class="stat-label">Campaigns Sent</div></div>
+        <div class="stat-card"><div class="stat-value" id="ds-avg-review">-</div><div class="stat-label">Avg Review</div></div>
+        <div class="stat-card"><div class="stat-value" id="ds-referrals">0</div><div class="stat-label">Referrals</div></div>
+      </div>
+
+      <div class="card">
+        <h3>Lead Funnel</h3>
+        <div id="dashboard-funnel"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ LEADS ═══════════════════════════════════ -->
+    <div class="page" id="page-leads">
+      <div class="page-header">
+        <h2>Leads</h2>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="showImportModal()">Import CSV</button>
+          <button class="btn btn-primary" onclick="showLeadModal()">+ Add Lead</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="lead-search" placeholder="Search leads..." oninput="loadLeads()">
+        <select id="lead-filter-status" onchange="loadLeads()">
+          <option value="">All Statuses</option>
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="interested">Interested</option>
+          <option value="trial">Trial</option>
+          <option value="converted">Converted</option>
+          <option value="lost">Lost</option>
+        </select>
+        <select id="lead-filter-source" onchange="loadLeads()">
+          <option value="">All Sources</option>
+          <option value="manual">Manual</option>
+          <option value="import">Import</option>
+          <option value="scraper">Scraper</option>
+          <option value="instagram">Instagram</option>
+          <option value="facebook">Facebook</option>
+          <option value="website">Website</option>
+          <option value="referral">Referral</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" id="lead-email-selected" onclick="emailSelectedLeads()" style="display:none">Email Selected</button>
+      </div>
+      <div class="card" style="padding:0; overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="lead-select-all" onchange="toggleAllLeads(this)"></th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Location</th>
+              <th>Added</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leads-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ CAMPAIGNS ═══════════════════════════════════ -->
+    <div class="page" id="page-campaigns">
+      <div class="page-header">
+        <h2>Email Campaigns</h2>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="showTemplateModal()">+ Template</button>
+          <button class="btn btn-primary" onclick="showCampaignModal()">+ Campaign</button>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this, 'campaigns-list')">Campaigns</button>
+        <button class="tab-btn" onclick="switchTab(this, 'templates-list')">Templates</button>
+      </div>
+
+      <div class="tab-content active" id="campaigns-list">
+        <div class="card" style="padding:0; overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Template</th>
+                <th>Status</th>
+                <th>Sent</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="campaigns-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="templates-list">
+        <div id="templates-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:16px;"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ PROMOS ═══════════════════════════════════ -->
+    <div class="page" id="page-promos">
+      <div class="page-header">
+        <h2>Promos & Offers</h2>
+        <button class="btn btn-primary" onclick="showPromoModal()">+ Create Promo</button>
+      </div>
+      <div class="card" style="padding:0; overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Code</th>
+              <th>Type</th>
+              <th>Value</th>
+              <th>Dates</th>
+              <th>Uses</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="promos-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ CALENDAR ═══════════════════════════════════ -->
+    <div class="page" id="page-calendar">
+      <div class="page-header">
+        <h2>Content Calendar</h2>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="calPrev()">&larr; Prev</button>
+          <span id="cal-month-label" style="font-size:18px; font-weight:600; padding:0 12px;"></span>
+          <button class="btn btn-secondary" onclick="calNext()">Next &rarr;</button>
+          <button class="btn btn-primary" onclick="showCalendarEventModal()">+ Add Event</button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-header">Sun</div>
+        <div class="cal-header">Mon</div>
+        <div class="cal-header">Tue</div>
+        <div class="cal-header">Wed</div>
+        <div class="cal-header">Thu</div>
+        <div class="cal-header">Fri</div>
+        <div class="cal-header">Sat</div>
+      </div>
+      <div class="cal-grid" id="cal-days"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════ SOCIAL CARDS ═══════════════════════════════════ -->
+    <div class="page" id="page-social">
+      <div class="page-header">
+        <h2>Social Card Creator</h2>
+      </div>
+      <div class="card">
+        <p style="color:var(--text2); margin-bottom:16px;">
+          Create Instagram-ready promotional cards for classes and events.
+          This uses the same card creator engine from Aradia Time.
+        </p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Template Size</label>
+            <select id="social-template">
+              <option value="square">Square (1080x1080) - Posts</option>
+              <option value="story">Story (1080x1920) - Stories</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Studio</label>
+            <select id="social-studio">
+              <option value="South Edmonton">South Edmonton</option>
+              <option value="Kingsway Edmonton">Kingsway Edmonton</option>
+              <option value="St. Albert">St. Albert</option>
+              <option value="Spruce Grove">Spruce Grove</option>
+              <option value="all">All Locations</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Class / Event Name</label>
+          <input type="text" id="social-classname" placeholder="e.g. Pole 1, Aerial Silks Intro">
+        </div>
+        <div class="form-group">
+          <label>Subtitle</label>
+          <input type="text" id="social-subtitle" placeholder="e.g. New Session Starting!">
+        </div>
+        <div class="form-group">
+          <label>Schedule Entries</label>
+          <div id="social-entries"></div>
+          <button class="btn btn-secondary btn-sm" onclick="addSocialEntry()" style="margin-top:8px;">+ Add Date/Time</button>
+        </div>
+        <div class="btn-group" style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="generateSocialCard()">Generate Preview</button>
+        </div>
+        <div id="social-preview" style="margin-top:16px;"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ MEMBERS ═══════════════════════════════════ -->
+    <div class="page" id="page-members">
+      <div class="page-header">
+        <h2>Members</h2>
+        <button class="btn btn-primary" onclick="showMemberModal()">+ Add Member</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="member-search" placeholder="Search members..." oninput="loadMembers()">
+        <select id="member-filter-status" onchange="loadMembers()">
+          <option value="">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="paused">Paused</option>
+        </select>
+        <select id="member-filter-location" onchange="loadMembers()">
+          <option value="">All Locations</option>
+          <option value="South Edmonton">South Edmonton</option>
+          <option value="Kingsway Edmonton">Kingsway Edmonton</option>
+          <option value="St. Albert">St. Albert</option>
+          <option value="Spruce Grove">Spruce Grove</option>
+        </select>
+      </div>
+      <div class="card" style="padding:0; overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Location</th>
+              <th>Joined</th>
+              <th>Last Visit</th>
+              <th>Visits</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="members-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ RETENTION ═══════════════════════════════════ -->
+    <div class="page" id="page-retention">
+      <div class="page-header">
+        <h2>Retention Dashboard</h2>
+        <button class="btn btn-secondary" onclick="loadRetention()">Refresh</button>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="ret-at-risk">0</div>
+          <div class="stat-label">At-Risk Members</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="ret-no-visit">0</div>
+          <div class="stat-label">Never Visited</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="ret-2weeks">0</div>
+          <div class="stat-label">2+ Weeks Absent</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>At-Risk Members (14+ days since last visit)</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Location</th>
+              <th>Last Visit</th>
+              <th>Total Visits</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="retention-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ REFERRALS ═══════════════════════════════════ -->
+    <div class="page" id="page-referrals">
+      <div class="page-header">
+        <h2>Referral Tracker</h2>
+        <button class="btn btn-primary" onclick="showReferralModal()">+ Add Referral</button>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this, 'referrals-all')">All Referrals</button>
+        <button class="tab-btn" onclick="switchTab(this, 'referrals-top')">Top Referrers</button>
+      </div>
+
+      <div class="tab-content active" id="referrals-all">
+        <div class="card" style="padding:0; overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Referred By</th>
+                <th>Referred Person</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Reward</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="referrals-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="referrals-top">
+        <div class="card" style="padding:0; overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Member</th>
+                <th>Email</th>
+                <th>Total Referrals</th>
+                <th>Converted</th>
+              </tr>
+            </thead>
+            <tbody id="top-referrers-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ REVIEWS ═══════════════════════════════════ -->
+    <div class="page" id="page-reviews">
+      <div class="page-header">
+        <h2>Review Manager</h2>
+        <button class="btn btn-primary" onclick="showReviewModal()">+ Add Review</button>
+      </div>
+      <div class="stat-grid" id="review-stats-grid"></div>
+      <div class="filter-bar">
+        <select id="review-filter-platform" onchange="loadReviews()">
+          <option value="">All Platforms</option>
+          <option value="google">Google</option>
+          <option value="yelp">Yelp</option>
+          <option value="facebook">Facebook</option>
+        </select>
+        <select id="review-filter-responded" onchange="loadReviews()">
+          <option value="">All</option>
+          <option value="false">Needs Response</option>
+          <option value="true">Responded</option>
+        </select>
+      </div>
+      <div id="reviews-list"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════ MILESTONES ═══════════════════════════════════ -->
+    <div class="page" id="page-milestones">
+      <div class="page-header">
+        <h2>Member Milestones</h2>
+        <button class="btn btn-secondary" onclick="loadMilestones()">Refresh</button>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this, 'ms-birthdays')">Upcoming Birthdays</button>
+        <button class="tab-btn" onclick="switchTab(this, 'ms-anniversaries')">Anniversaries</button>
+      </div>
+
+      <div class="tab-content active" id="ms-birthdays">
+        <div class="card" style="padding:0; overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Birthday</th>
+                <th>Location</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="birthdays-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="ms-anniversaries">
+        <div class="card" style="padding:0; overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Join Date</th>
+                <th>Years</th>
+                <th>Location</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="anniversaries-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+<!-- ═══════════════════════════════════ MODALS ═══════════════════════════════════ -->
+
+<!-- Lead Modal -->
+<div class="modal-overlay" id="lead-modal">
+  <div class="modal">
+    <h3 id="lead-modal-title">Add Lead</h3>
+    <input type="hidden" id="lead-edit-id">
+    <div class="form-row">
+      <div class="form-group"><label>Name</label><input type="text" id="lead-name"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="lead-email"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone</label><input type="text" id="lead-phone"></div>
+      <div class="form-group">
+        <label>Source</label>
+        <select id="lead-source">
+          <option value="manual">Manual</option>
+          <option value="scraper">Scraper</option>
+          <option value="instagram">Instagram</option>
+          <option value="facebook">Facebook</option>
+          <option value="website">Website</option>
+          <option value="referral">Referral</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Status</label>
+        <select id="lead-status">
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="interested">Interested</option>
+          <option value="trial">Trial</option>
+          <option value="converted">Converted</option>
+          <option value="lost">Lost</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="lead-location">
+          <option value="">None</option>
+          <option value="South Edmonton">South Edmonton</option>
+          <option value="Kingsway Edmonton">Kingsway Edmonton</option>
+          <option value="St. Albert">St. Albert</option>
+          <option value="Spruce Grove">Spruce Grove</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Tags (comma separated)</label><input type="text" id="lead-tags" placeholder="e.g. pole, aerial, beginner"></div>
+    <div class="form-group"><label>Notes</label><textarea id="lead-notes"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('lead-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLead()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Email Lead Modal -->
+<div class="modal-overlay" id="email-lead-modal">
+  <div class="modal" style="max-width:700px;">
+    <h3>Email Leads</h3>
+    <p style="color:var(--text2); margin-bottom:12px;" id="email-lead-count"></p>
+    <div class="form-group"><label>Subject</label><input type="text" id="email-subject" placeholder="Subject line..."></div>
+    <div class="form-group">
+      <label>Body (use {name} for personalization)</label>
+      <div class="email-editor">
+        <div class="email-toolbar">
+          <button onclick="execCmd('bold')"><b>B</b></button>
+          <button onclick="execCmd('italic')"><i>I</i></button>
+          <button onclick="execCmd('underline')"><u>U</u></button>
+          <button onclick="execCmd('insertUnorderedList')">List</button>
+          <button onclick="insertVar('{name}')">+ Name</button>
+        </div>
+        <div class="email-body-edit" contenteditable="true" id="email-body"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('email-lead-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendLeadEmail()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal">
+    <h3>Import Leads from CSV</h3>
+    <p style="color:var(--text2); margin-bottom:12px;">CSV should have columns: name, email, phone, source, location, notes</p>
+    <div class="form-group">
+      <label>Paste CSV Data</label>
+      <textarea id="import-csv" rows="10" placeholder="name,email,phone,source,location,notes&#10;Jane Doe,jane@example.com,555-1234,instagram,South Edmonton,Interested in pole"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('import-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="importCSV()">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Template Modal -->
+<div class="modal-overlay" id="template-modal">
+  <div class="modal" style="max-width:700px;">
+    <h3 id="template-modal-title">Create Email Template</h3>
+    <input type="hidden" id="template-edit-id">
+    <div class="form-row">
+      <div class="form-group"><label>Template Name</label><input type="text" id="template-name" placeholder="e.g. Welcome Series #1"></div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="template-category">
+          <option value="welcome">Welcome</option>
+          <option value="winback">Win-Back</option>
+          <option value="promo">Promo</option>
+          <option value="newsletter">Newsletter</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Subject Line</label><input type="text" id="template-subject" placeholder="e.g. Welcome to Aradia, {name}!"></div>
+    <div class="form-group">
+      <label>Body HTML (use {name} for personalization)</label>
+      <textarea id="template-body" rows="10" placeholder="<h1>Hey {name}!</h1><p>Welcome to Aradia Fitness...</p>"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('template-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTemplate()">Save Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- Campaign Modal -->
+<div class="modal-overlay" id="campaign-modal">
+  <div class="modal">
+    <h3>Create Campaign</h3>
+    <div class="form-group"><label>Campaign Name</label><input type="text" id="campaign-name" placeholder="e.g. March New Member Blast"></div>
+    <div class="form-group">
+      <label>Email Template</label>
+      <select id="campaign-template"></select>
+    </div>
+    <div class="form-group">
+      <label>Filter: Lead Status</label>
+      <select id="campaign-filter-status">
+        <option value="">All</option>
+        <option value="new">New</option>
+        <option value="contacted">Contacted</option>
+        <option value="interested">Interested</option>
+        <option value="trial">Trial</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Filter: Location</label>
+      <select id="campaign-filter-location">
+        <option value="">All</option>
+        <option value="South Edmonton">South Edmonton</option>
+        <option value="Kingsway Edmonton">Kingsway Edmonton</option>
+        <option value="St. Albert">St. Albert</option>
+        <option value="Spruce Grove">Spruce Grove</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('campaign-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCampaign()">Create Campaign</button>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Event Modal -->
+<div class="modal-overlay" id="calendar-event-modal">
+  <div class="modal">
+    <h3 id="cal-event-modal-title">Add Calendar Event</h3>
+    <input type="hidden" id="cal-event-edit-id">
+    <div class="form-row">
+      <div class="form-group"><label>Title</label><input type="text" id="cal-event-title" placeholder="e.g. Pole 1 Promo Post"></div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="cal-event-type">
+          <option value="post">Social Post</option>
+          <option value="email">Email Blast</option>
+          <option value="promo">Promo Launch</option>
+          <option value="event">Event</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Platform</label>
+        <select id="cal-event-platform">
+          <option value="instagram">Instagram</option>
+          <option value="facebook">Facebook</option>
+          <option value="tiktok">TikTok</option>
+          <option value="email">Email</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="cal-event-location">
+          <option value="">All Locations</option>
+          <option value="South Edmonton">South Edmonton</option>
+          <option value="Kingsway Edmonton">Kingsway Edmonton</option>
+          <option value="St. Albert">St. Albert</option>
+          <option value="Spruce Grove">Spruce Grove</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date</label><input type="date" id="cal-event-date"></div>
+      <div class="form-group"><label>Time</label><input type="time" id="cal-event-time"></div>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="cal-event-status">
+        <option value="planned">Planned</option>
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Content / Caption</label><textarea id="cal-event-content" placeholder="Post caption or email content..."></textarea></div>
+    <div class="form-group"><label>Notes</label><textarea id="cal-event-notes" rows="2" placeholder="Internal notes..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('calendar-event-modal')">Cancel</button>
+      <button class="btn btn-danger" id="cal-event-delete-btn" style="display:none" onclick="deleteCalendarEvent()">Delete</button>
+      <button class="btn btn-primary" onclick="saveCalendarEvent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Member Modal -->
+<div class="modal-overlay" id="member-modal">
+  <div class="modal">
+    <h3 id="member-modal-title">Add Member</h3>
+    <input type="hidden" id="member-edit-id">
+    <div class="form-row">
+      <div class="form-group"><label>Name</label><input type="text" id="member-name"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="member-email"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone</label><input type="text" id="member-phone"></div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="member-location">
+          <option value="">Select</option>
+          <option value="South Edmonton">South Edmonton</option>
+          <option value="Kingsway Edmonton">Kingsway Edmonton</option>
+          <option value="St. Albert">St. Albert</option>
+          <option value="Spruce Grove">Spruce Grove</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Join Date</label><input type="date" id="member-joindate"></div>
+      <div class="form-group"><label>Birthday</label><input type="date" id="member-birthday"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Status</label>
+        <select id="member-status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="paused">Paused</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Referral Source</label><input type="text" id="member-referral-source" placeholder="e.g. Instagram, Friend"></div>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="member-notes"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('member-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMember()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Referral Modal -->
+<div class="modal-overlay" id="referral-modal">
+  <div class="modal">
+    <h3>Add Referral</h3>
+    <div class="form-group">
+      <label>Referring Member</label>
+      <select id="referral-referrer"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Referred Person's Name</label><input type="text" id="referral-name"></div>
+      <div class="form-group"><label>Referred Person's Email</label><input type="email" id="referral-email"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('referral-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveReferral()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Review Modal -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal">
+    <h3>Add Review</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Platform</label>
+        <select id="review-platform">
+          <option value="google">Google</option>
+          <option value="yelp">Yelp</option>
+          <option value="facebook">Facebook</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Author</label><input type="text" id="review-author"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Rating</label>
+        <select id="review-rating">
+          <option value="5">5 Stars</option>
+          <option value="4">4 Stars</option>
+          <option value="3">3 Stars</option>
+          <option value="2">2 Stars</option>
+          <option value="1">1 Star</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="review-location">
+          <option value="">Select</option>
+          <option value="South Edmonton">South Edmonton</option>
+          <option value="Kingsway Edmonton">Kingsway Edmonton</option>
+          <option value="St. Albert">St. Albert</option>
+          <option value="Spruce Grove">Spruce Grove</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Review Date</label><input type="date" id="review-date"></div>
+    <div class="form-group"><label>Review Content</label><textarea id="review-content"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('review-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveReview()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Respond to Review Modal -->
+<div class="modal-overlay" id="respond-modal">
+  <div class="modal">
+    <h3>Respond to Review</h3>
+    <input type="hidden" id="respond-review-id">
+    <div id="respond-review-preview" style="margin-bottom:16px;"></div>
+    <div class="form-group"><label>Your Response</label><textarea id="respond-text" rows="4" placeholder="Thank you for your feedback..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('respond-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveResponse()">Save Response</button>
+    </div>
+  </div>
+</div>
+
+<!-- Promo Modal -->
+<div class="modal-overlay" id="promo-modal">
+  <div class="modal">
+    <h3 id="promo-modal-title">Create Promo</h3>
+    <input type="hidden" id="promo-edit-id">
+    <div class="form-row">
+      <div class="form-group"><label>Name</label><input type="text" id="promo-name" placeholder="e.g. Spring Special"></div>
+      <div class="form-group"><label>Code</label><input type="text" id="promo-code" placeholder="e.g. SPRING25" style="text-transform:uppercase"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Type</label>
+        <select id="promo-type">
+          <option value="discount">Discount</option>
+          <option value="free_class">Free Class</option>
+          <option value="bundle">Bundle Deal</option>
+          <option value="referral_reward">Referral Reward</option>
+          <option value="challenge">Challenge</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Value</label><input type="text" id="promo-value" placeholder="e.g. 25% off, $10 off, Free trial"></div>
+    </div>
+    <div class="form-group"><label>Description</label><textarea id="promo-description" rows="2"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Start Date</label><input type="date" id="promo-start"></div>
+      <div class="form-group"><label>End Date</label><input type="date" id="promo-end"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Location</label>
+        <select id="promo-location">
+          <option value="">All Locations</option>
+          <option value="South Edmonton">South Edmonton</option>
+          <option value="Kingsway Edmonton">Kingsway Edmonton</option>
+          <option value="St. Albert">St. Albert</option>
+          <option value="Spruce Grove">Spruce Grove</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Max Uses</label><input type="number" id="promo-maxuses" placeholder="Leave empty for unlimited"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('promo-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePromo()">Save Promo</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.getElementById('page-' + page).classList.add('active');
+    loadPage(page);
+  });
+});
+
+function loadPage(page) {
+  const loaders = {
+    dashboard: loadDashboard,
+    leads: loadLeads,
+    campaigns: loadCampaigns,
+    calendar: loadCalendar,
+    members: loadMembers,
+    retention: loadRetention,
+    referrals: loadReferrals,
+    reviews: loadReviews,
+    milestones: loadMilestones,
+    promos: loadPromos,
+  };
+  if (loaders[page]) loaders[page]();
+}
+
+function switchTab(btn, tabId) {
+  const bar = btn.parentElement;
+  bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const parent = bar.parentElement;
+  parent.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function formatDate(d) {
+  if (!d) return '-';
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function badgeHTML(status) {
+  return `<span class="badge badge-${status}">${status}</span>`;
+}
+
+function starsHTML(rating) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) {
+    s += i <= rating ? '<span>&#9733;</span>' : '<span class="empty">&#9733;</span>';
+  }
+  return `<span class="stars">${s}</span>`;
+}
+
+// ═══════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════
+async function loadDashboard() {
+  try {
+    const res = await fetch('/api/dashboard');
+    const data = await res.json();
+
+    let totalLeads = 0, newLeads = 0;
+    (data.leads || []).forEach(r => {
+      totalLeads += parseInt(r.count);
+      if (r.status === 'new') newLeads = parseInt(r.count);
+    });
+    document.getElementById('ds-total-leads').textContent = totalLeads;
+    document.getElementById('ds-new-leads').textContent = newLeads;
+
+    let activeMembers = 0;
+    (data.members || []).forEach(r => { if (r.status === 'active') activeMembers = parseInt(r.count); });
+    document.getElementById('ds-members').textContent = activeMembers;
+
+    let sentCampaigns = 0;
+    (data.campaigns || []).forEach(r => { if (r.status === 'sent') sentCampaigns = parseInt(r.count); });
+    document.getElementById('ds-campaigns').textContent = sentCampaigns;
+
+    document.getElementById('ds-avg-review').textContent = data.reviews?.avg_rating || '-';
+    document.getElementById('ds-referrals').textContent = data.referrals?.total || 0;
+
+    // Funnel
+    const funnel = document.getElementById('dashboard-funnel');
+    const maxCount = Math.max(...(data.leads || []).map(r => parseInt(r.count)), 1);
+    funnel.innerHTML = (data.leads || []).map(r => `
+      <div class="funnel-bar">
+        <div class="label">${r.status}</div>
+        <div class="bar-bg">
+          <div class="bar-fill" style="width:${(parseInt(r.count)/maxCount*100)}%">${r.count}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error('Dashboard load error:', err);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  LEADS
+// ═══════════════════════════════════════════
+let selectedLeads = new Set();
+
+async function loadLeads() {
+  const search = document.getElementById('lead-search').value;
+  const status = document.getElementById('lead-filter-status').value;
+  const source = document.getElementById('lead-filter-source').value;
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);
+  if (status) params.set('status', status);
+  if (source) params.set('source', source);
+
+  const res = await fetch('/api/leads?' + params);
+  const leads = await res.json();
+  const tbody = document.getElementById('leads-table');
+  tbody.innerHTML = leads.map(l => `
+    <tr>
+      <td><input type="checkbox" class="lead-cb" data-id="${l.id}" onchange="updateLeadSelection()"></td>
+      <td>${l.name || '-'}</td>
+      <td>${l.email || '-'}</td>
+      <td>${l.phone || '-'}</td>
+      <td>${l.source || '-'}</td>
+      <td>${badgeHTML(l.status)}</td>
+      <td>${l.location || '-'}</td>
+      <td>${formatDate(l.created_at)}</td>
+      <td>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" onclick="editLead('${l.id}')">Edit</button>
+          <button class="btn btn-secondary btn-sm" onclick="emailSingleLead('${l.id}')">Email</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">Del</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  selectedLeads.clear();
+  updateLeadSelection();
+}
+
+function updateLeadSelection() {
+  selectedLeads.clear();
+  document.querySelectorAll('.lead-cb:checked').forEach(cb => selectedLeads.add(cb.dataset.id));
+  document.getElementById('lead-email-selected').style.display = selectedLeads.size > 0 ? '' : 'none';
+}
+
+function toggleAllLeads(cb) {
+  document.querySelectorAll('.lead-cb').forEach(c => { c.checked = cb.checked; });
+  updateLeadSelection();
+}
+
+function showLeadModal(lead = null) {
+  document.getElementById('lead-modal-title').textContent = lead ? 'Edit Lead' : 'Add Lead';
+  document.getElementById('lead-edit-id').value = lead?.id || '';
+  document.getElementById('lead-name').value = lead?.name || '';
+  document.getElementById('lead-email').value = lead?.email || '';
+  document.getElementById('lead-phone').value = lead?.phone || '';
+  document.getElementById('lead-source').value = lead?.source || 'manual';
+  document.getElementById('lead-status').value = lead?.status || 'new';
+  document.getElementById('lead-location').value = lead?.location || '';
+  document.getElementById('lead-tags').value = lead?.tags || '';
+  document.getElementById('lead-notes').value = lead?.notes || '';
+  openModal('lead-modal');
+}
+
+async function editLead(id) {
+  const res = await fetch('/api/leads?search=');
+  const leads = await res.json();
+  const lead = leads.find(l => l.id === id);
+  if (lead) showLeadModal(lead);
+}
+
+async function saveLead() {
+  const id = document.getElementById('lead-edit-id').value;
+  const data = {
+    name: document.getElementById('lead-name').value,
+    email: document.getElementById('lead-email').value,
+    phone: document.getElementById('lead-phone').value,
+    source: document.getElementById('lead-source').value,
+    status: document.getElementById('lead-status').value,
+    location: document.getElementById('lead-location').value,
+    tags: document.getElementById('lead-tags').value,
+    notes: document.getElementById('lead-notes').value,
+  };
+  await fetch(id ? `/api/leads/${id}` : '/api/leads', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  closeModal('lead-modal');
+  toast(id ? 'Lead updated' : 'Lead added');
+  loadLeads();
+}
+
+async function deleteLead(id) {
+  if (!confirm('Delete this lead?')) return;
+  await fetch(`/api/leads/${id}`, { method: 'DELETE' });
+  toast('Lead deleted');
+  loadLeads();
+}
+
+function emailSingleLead(id) {
+  selectedLeads.clear();
+  selectedLeads.add(id);
+  emailSelectedLeads();
+}
+
+function emailSelectedLeads() {
+  document.getElementById('email-lead-count').textContent = `Sending to ${selectedLeads.size} lead(s)`;
+  document.getElementById('email-subject').value = '';
+  document.getElementById('email-body').innerHTML = '';
+  openModal('email-lead-modal');
+}
+
+function execCmd(cmd) { document.execCommand(cmd); }
+function insertVar(v) {
+  document.execCommand('insertText', false, v);
+}
+
+async function sendLeadEmail() {
+  const subject = document.getElementById('email-subject').value;
+  const body = document.getElementById('email-body').innerHTML;
+  if (!subject) return toast('Subject required');
+  await fetch('/api/leads/email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ leadIds: [...selectedLeads], subject, body }),
+  });
+  closeModal('email-lead-modal');
+  toast('Emails sent!');
+}
+
+// ── CSV Import ──
+function showImportModal() { openModal('import-modal'); }
+
+async function importCSV() {
+  const csv = document.getElementById('import-csv').value.trim();
+  if (!csv) return;
+  const lines = csv.split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const leads = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',').map(v => v.trim());
+    const lead = {};
+    headers.forEach((h, idx) => { lead[h] = vals[idx] || ''; });
+    leads.push(lead);
+  }
+  const res = await fetch('/api/leads/import', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ leads }),
+  });
+  const result = await res.json();
+  closeModal('import-modal');
+  toast(`Imported ${result.imported} leads`);
+  loadLeads();
+}
+
+// ═══════════════════════════════════════════
+//  CAMPAIGNS & TEMPLATES
+// ═══════════════════════════════════════════
+let allTemplates = [];
+
+async function loadCampaigns() {
+  // Load campaigns
+  const cRes = await fetch('/api/campaigns');
+  const campaigns = await cRes.json();
+  document.getElementById('campaigns-table').innerHTML = campaigns.map(c => `
+    <tr>
+      <td>${c.name}</td>
+      <td>${c.template_name || '-'}</td>
+      <td>${badgeHTML(c.status)}</td>
+      <td>${c.total_sent || 0}</td>
+      <td>${c.sent_at ? formatDate(c.sent_at) : (c.scheduled_at ? 'Scheduled: ' + formatDate(c.scheduled_at) : '-')}</td>
+      <td>
+        <div class="btn-group">
+          ${c.status === 'draft' ? `<button class="btn btn-success btn-sm" onclick="sendCampaign('${c.id}')">Send Now</button>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="deleteCampaign('${c.id}')">Del</button>
+        </div>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text2);">No campaigns yet</td></tr>';
+
+  // Load templates
+  const tRes = await fetch('/api/templates');
+  allTemplates = await tRes.json();
+  document.getElementById('templates-grid').innerHTML = allTemplates.map(t => `
+    <div class="card">
+      <h3>${t.name}</h3>
+      <p style="color:var(--text2); font-size:12px; margin-bottom:8px;">${t.category} &bull; ${formatDate(t.created_at)}</p>
+      <p style="font-size:13px; margin-bottom:8px;"><strong>Subject:</strong> ${t.subject}</p>
+      <div style="font-size:12px; color:var(--text2); max-height:80px; overflow:hidden;">${t.body}</div>
+      <div class="btn-group" style="margin-top:12px;">
+        <button class="btn btn-secondary btn-sm" onclick="editTemplate('${t.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTemplate('${t.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('') || '<p style="color:var(--text2);">No templates yet. Create one to get started.</p>';
+}
+
+function showTemplateModal(tmpl = null) {
+  document.getElementById('template-modal-title').textContent = tmpl ? 'Edit Template' : 'Create Email Template';
+  document.getElementById('template-edit-id').value = tmpl?.id || '';
+  document.getElementById('template-name').value = tmpl?.name || '';
+  document.getElementById('template-subject').value = tmpl?.subject || '';
+  document.getElementById('template-body').value = tmpl?.body || '';
+  document.getElementById('template-category').value = tmpl?.category || 'general';
+  openModal('template-modal');
+}
+
+async function editTemplate(id) {
+  const tmpl = allTemplates.find(t => t.id === id);
+  if (tmpl) showTemplateModal(tmpl);
+}
+
+async function saveTemplate() {
+  const id = document.getElementById('template-edit-id').value;
+  const data = {
+    name: document.getElementById('template-name').value,
+    subject: document.getElementById('template-subject').value,
+    body: document.getElementById('template-body').value,
+    category: document.getElementById('template-category').value,
+  };
+  await fetch(id ? `/api/templates/${id}` : '/api/templates', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  closeModal('template-modal');
+  toast('Template saved');
+  loadCampaigns();
+}
+
+async function deleteTemplate(id) {
+  if (!confirm('Delete this template?')) return;
+  await fetch(`/api/templates/${id}`, { method: 'DELETE' });
+  toast('Template deleted');
+  loadCampaigns();
+}
+
+function showCampaignModal() {
+  document.getElementById('campaign-name').value = '';
+  // Populate template dropdown
+  const sel = document.getElementById('campaign-template');
+  sel.innerHTML = '<option value="">Select template...</option>' +
+    allTemplates.map(t => `<option value="${t.id}">${t.name} - ${t.subject}</option>`).join('');
+  document.getElementById('campaign-filter-status').value = '';
+  document.getElementById('campaign-filter-location').value = '';
+  openModal('campaign-modal');
+}
+
+async function saveCampaign() {
+  const data = {
+    name: document.getElementById('campaign-name').value,
+    template_id: document.getElementById('campaign-template').value,
+    recipient_filter: {
+      status: document.getElementById('campaign-filter-status').value || undefined,
+      location: document.getElementById('campaign-filter-location').value || undefined,
+    },
+  };
+  if (!data.name || !data.template_id) return toast('Name and template required');
+  await fetch('/api/campaigns', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  closeModal('campaign-modal');
+  toast('Campaign created');
+  loadCampaigns();
+}
+
+async function sendCampaign(id) {
+  if (!confirm('Send this campaign to all matching leads?')) return;
+  const res = await fetch(`/api/campaigns/${id}/send`, { method: 'POST' });
+  const result = await res.json();
+  toast(`Campaign sent to ${result.sent} recipients`);
+  loadCampaigns();
+}
+
+async function deleteCampaign(id) {
+  if (!confirm('Delete this campaign?')) return;
+  await fetch(`/api/campaigns/${id}`, { method: 'DELETE' });
+  toast('Campaign deleted');
+  loadCampaigns();
+}
+
+// ═══════════════════════════════════════════
+//  CONTENT CALENDAR
+// ═══════════════════════════════════════════
+let calYear, calMonth, calEvents = [];
+
+function initCalendar() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+}
+
+async function loadCalendar() {
+  if (calYear === undefined) initCalendar();
+  const label = new Date(calYear, calMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('cal-month-label').textContent = label;
+
+  const res = await fetch(`/api/calendar?year=${calYear}&month=${calMonth + 1}`);
+  calEvents = await res.json();
+  renderCalendar();
+}
+
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } loadCalendar(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } loadCalendar(); }
+
+function renderCalendar() {
+  const grid = document.getElementById('cal-days');
+  grid.innerHTML = '';
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+
+  // Prev month padding
+  const prevDays = new Date(calYear, calMonth, 0).getDate();
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = document.createElement('div');
+    d.className = 'cal-day other-month';
+    d.innerHTML = `<div class="day-num">${prevDays - i}</div>`;
+    grid.appendChild(d);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const d = document.createElement('div');
+    d.className = 'cal-day' + (dateStr === todayStr ? ' today' : '');
+    d.onclick = () => showCalendarEventModal(dateStr);
+
+    const dayEvents = calEvents.filter(e => e.scheduled_date?.startsWith(dateStr));
+    d.innerHTML = `
+      <div class="day-num">${day}</div>
+      ${dayEvents.map(e => `<div class="cal-event ${e.type}" onclick="event.stopPropagation(); editCalendarEvent('${e.id}')">${e.title}</div>`).join('')}
+    `;
+    grid.appendChild(d);
+  }
+
+  // Next month padding
+  const totalCells = firstDay + daysInMonth;
+  const remaining = 7 - (totalCells % 7);
+  if (remaining < 7) {
+    for (let i = 1; i <= remaining; i++) {
+      const d = document.createElement('div');
+      d.className = 'cal-day other-month';
+      d.innerHTML = `<div class="day-num">${i}</div>`;
+      grid.appendChild(d);
+    }
+  }
+}
+
+function showCalendarEventModal(date = null) {
+  document.getElementById('cal-event-modal-title').textContent = 'Add Calendar Event';
+  document.getElementById('cal-event-edit-id').value = '';
+  document.getElementById('cal-event-title').value = '';
+  document.getElementById('cal-event-type').value = 'post';
+  document.getElementById('cal-event-platform').value = 'instagram';
+  document.getElementById('cal-event-location').value = '';
+  document.getElementById('cal-event-date').value = date || '';
+  document.getElementById('cal-event-time').value = '';
+  document.getElementById('cal-event-status').value = 'planned';
+  document.getElementById('cal-event-content').value = '';
+  document.getElementById('cal-event-notes').value = '';
+  document.getElementById('cal-event-delete-btn').style.display = 'none';
+  openModal('calendar-event-modal');
+}
+
+function editCalendarEvent(id) {
+  const ev = calEvents.find(e => e.id === id);
+  if (!ev) return;
+  document.getElementById('cal-event-modal-title').textContent = 'Edit Calendar Event';
+  document.getElementById('cal-event-edit-id').value = ev.id;
+  document.getElementById('cal-event-title').value = ev.title;
+  document.getElementById('cal-event-type').value = ev.type;
+  document.getElementById('cal-event-platform').value = ev.platform;
+  document.getElementById('cal-event-location').value = ev.location || '';
+  document.getElementById('cal-event-date').value = ev.scheduled_date?.split('T')[0] || '';
+  document.getElementById('cal-event-time').value = ev.scheduled_time || '';
+  document.getElementById('cal-event-status').value = ev.status;
+  document.getElementById('cal-event-content').value = ev.content || '';
+  document.getElementById('cal-event-notes').value = ev.notes || '';
+  document.getElementById('cal-event-delete-btn').style.display = '';
+  openModal('calendar-event-modal');
+}
+
+async function saveCalendarEvent() {
+  const id = document.getElementById('cal-event-edit-id').value;
+  const data = {
+    title: document.getElementById('cal-event-title').value,
+    type: document.getElementById('cal-event-type').value,
+    platform: document.getElementById('cal-event-platform').value,
+    location: document.getElementById('cal-event-location').value,
+    scheduled_date: document.getElementById('cal-event-date').value,
+    scheduled_time: document.getElementById('cal-event-time').value,
+    status: document.getElementById('cal-event-status').value,
+    content: document.getElementById('cal-event-content').value,
+    notes: document.getElementById('cal-event-notes').value,
+  };
+  if (!data.title || !data.scheduled_date) return toast('Title and date required');
+  await fetch(id ? `/api/calendar/${id}` : '/api/calendar', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  closeModal('calendar-event-modal');
+  toast('Event saved');
+  loadCalendar();
+}
+
+async function deleteCalendarEvent() {
+  const id = document.getElementById('cal-event-edit-id').value;
+  if (!confirm('Delete this event?')) return;
+  await fetch(`/api/calendar/${id}`, { method: 'DELETE' });
+  closeModal('calendar-event-modal');
+  toast('Event deleted');
+  loadCalendar();
+}
+
+// ═══════════════════════════════════════════
+//  SOCIAL CARD CREATOR
+// ═══════════════════════════════════════════
+function addSocialEntry() {
+  const container = document.getElementById('social-entries');
+  const div = document.createElement('div');
+  div.className = 'form-row';
+  div.style.marginBottom = '8px';
+  div.innerHTML = `
+    <div class="form-group"><input type="date" class="social-entry-date"></div>
+    <div class="form-group"><input type="time" class="social-entry-time"></div>
+    <div><button class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove()">X</button></div>
+  `;
+  container.appendChild(div);
+}
+
+async function generateSocialCard() {
+  toast('Social card generation requires the IMAGE_GENERATOR_URL service. Configure it in .env');
+}
+
+// ═══════════════════════════════════════════
+//  MEMBERS
+// ═══════════════════════════════════════════
+async function loadMembers() {
+  const search = document.getElementById('member-search').value;
+  const status = document.getElementById('member-filter-status').value;
+  const location = document.getElementById('member-filter-location').value;
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);
+  if (status) params.set('status', status);
+  if (location) params.set('location', location);
+
+  const res = await fetch('/api/members?' + params);
+  const members = await res.json();
+  document.getElementById('members-table').innerHTML = members.map(m => `
+    <tr>
+      <td>${m.name || '-'}</td>
+      <td>${m.email || '-'}</td>
+      <td>${m.location || '-'}</td>
+      <td>${formatDate(m.join_date)}</td>
+      <td>${formatDate(m.last_attendance)}</td>
+      <td>${m.attendance_count || 0}</td>
+      <td>${badgeHTML(m.status)}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="editMember('${m.id}')">Edit</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--text2);">No members yet</td></tr>';
+}
+
+function showMemberModal(member = null) {
+  document.getElementById('member-modal-title').textContent = member ? 'Edit Member' : 'Add Member';
+  document.getElementById('member-edit-id').value = member?.id || '';
+  document.getElementById('member-name').value = member?.name || '';
+  document.getElementById('member-email').value = member?.email || '';
+  document.getElementById('member-phone').value = member?.phone || '';
+  document.getElementById('member-location').value = member?.location || '';
+  document.getElementById('member-joindate').value = member?.join_date?.split('T')[0] || '';
+  document.getElementById('member-birthday').value = member?.birthday?.split('T')[0] || '';
+  document.getElementById('member-status').value = member?.status || 'active';
+  document.getElementById('member-referral-source').value = member?.referral_source || '';
+  document.getElementById('member-notes').value = member?.notes || '';
+  openModal('member-modal');
+}
+
+let allMembers = [];
+async function editMember(id) {
+  const res = await fetch('/api/members');
+  allMembers = await res.json();
+  const member = allMembers.find(m => m.id === id);
+  if (member) showMemberModal(member);
+}
+
+async function saveMember() {
+  const id = document.getElementById('member-edit-id').value;
+  const data = {
+    name: document.getElementById('member-name').value,
+    email: document.getElementById('member-email').value,
+    phone: document.getElementById('member-phone').value,
+    location: document.getElementById('member-location').value,
+    join_date: document.getElementById('member-joindate').value || null,
+    birthday: document.getElementById('member-birthday').value || null,
+    status: document.getElementById('member-status').value,
+    referral_source: document.getElementById('member-referral-source').value,
+    notes: document.getElementById('member-notes').value,
+  };
+  await fetch(id ? `/api/members/${id}` : '/api/members', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  closeModal('member-modal');
+  toast(id ? 'Member updated' : 'Member added');
+  loadMembers();
+}
+
+// ═══════════════════════════════════════════
+//  RETENTION
+// ═══════════════════════════════════════════
+async function loadRetention() {
+  const res = await fetch('/api/members/retention/at-risk');
+  const atRisk = await res.json();
+  document.getElementById('ret-at-risk').textContent = atRisk.length;
+  document.getElementById('ret-no-visit').textContent = atRisk.filter(m => !m.last_attendance).length;
+  document.getElementById('ret-2weeks').textContent = atRisk.filter(m => m.last_attendance).length;
+
+  document.getElementById('retention-table').innerHTML = atRisk.map(m => `
+    <tr>
+      <td>${m.name || '-'}</td>
+      <td>${m.email || '-'}</td>
+      <td>${m.location || '-'}</td>
+      <td>${m.last_attendance ? formatDate(m.last_attendance) : '<span style="color:var(--danger)">Never</span>'}</td>
+      <td>${m.attendance_count || 0}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="emailSingleMember('${m.email}','${m.name}')">Send Re-engagement</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text2);">No at-risk members</td></tr>';
+}
+
+async function emailSingleMember(email, name) {
+  const subject = prompt('Email subject:', `We miss you, ${name}!`);
+  if (!subject) return;
+  const body = prompt('Email body:', `Hey ${name}, we noticed you haven't been in for a while. We'd love to see you back at Aradia!`);
+  if (!body) return;
+  await fetch('/api/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ to: email, subject, html: `<p>${body}</p>` }),
+  });
+  toast('Email sent');
+}
+
+// ═══════════════════════════════════════════
+//  REFERRALS
+// ═══════════════════════════════════════════
+async function loadReferrals() {
+  const res = await fetch('/api/referrals');
+  const referrals = await res.json();
+  document.getElementById('referrals-table').innerHTML = referrals.map(r => `
+    <tr>
+      <td>${r.referrer_name || '-'}</td>
+      <td>${r.referred_name || '-'}</td>
+      <td>${r.referred_email || '-'}</td>
+      <td>${badgeHTML(r.status)}</td>
+      <td>
+        <div class="toggle-row" style="justify-content:flex-start;">
+          <label class="admin-toggle">
+            <input type="checkbox" ${r.reward_given ? 'checked' : ''} onchange="updateReferral('${r.id}', '${r.status}', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </td>
+      <td>${formatDate(r.created_at)}</td>
+      <td>
+        <select class="btn btn-secondary btn-sm" style="width:auto;" onchange="updateReferral('${r.id}', this.value, ${r.reward_given})">
+          <option value="pending" ${r.status==='pending'?'selected':''}>Pending</option>
+          <option value="contacted" ${r.status==='contacted'?'selected':''}>Contacted</option>
+          <option value="trial" ${r.status==='trial'?'selected':''}>Trial</option>
+          <option value="converted" ${r.status==='converted'?'selected':''}>Converted</option>
+          <option value="lost" ${r.status==='lost'?'selected':''}>Lost</option>
+        </select>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text2);">No referrals yet</td></tr>';
+
+  // Top referrers
+  const topRes = await fetch('/api/referrals/top');
+  const topReferrers = await topRes.json();
+  document.getElementById('top-referrers-table').innerHTML = topReferrers.map((r, i) => `
+    <tr>
+      <td style="font-weight:700; color:var(--accent);">#${i+1}</td>
+      <td>${r.name}</td>
+      <td>${r.email}</td>
+      <td>${r.referral_count}</td>
+      <td>${r.converted_count}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text2);">No referral data yet</td></tr>';
+}
+
+async function updateReferral(id, status, reward) {
+  await fetch(`/api/referrals/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status, reward_given: reward }),
+  });
+  toast('Referral updated');
+}
+
+async function showReferralModal() {
+  const res = await fetch('/api/members');
+  const members = await res.json();
+  document.getElementById('referral-referrer').innerHTML =
+    '<option value="">Select member...</option>' +
+    members.map(m => `<option value="${m.id}">${m.name} (${m.email})</option>`).join('');
+  document.getElementById('referral-name').value = '';
+  document.getElementById('referral-email').value = '';
+  openModal('referral-modal');
+}
+
+async function saveReferral() {
+  const data = {
+    referrer_id: document.getElementById('referral-referrer').value,
+    referred_name: document.getElementById('referral-name').value,
+    referred_email: document.getElementById('referral-email').value,
+  };
+  if (!data.referrer_id || !data.referred_name) return toast('Referrer and name required');
+  await fetch('/api/referrals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  closeModal('referral-modal');
+  toast('Referral added');
+  loadReferrals();
+}
+
+// ═══════════════════════════════════════════
+//  REVIEWS
+// ═══════════════════════════════════════════
+async function loadReviews() {
+  const platform = document.getElementById('review-filter-platform').value;
+  const responded = document.getElementById('review-filter-responded').value;
+  const params = new URLSearchParams();
+  if (platform) params.set('platform', platform);
+  if (responded) params.set('responded', responded);
+
+  // Stats
+  const statsRes = await fetch('/api/reviews/stats');
+  const stats = await statsRes.json();
+  const statsGrid = document.getElementById('review-stats-grid');
+  statsGrid.innerHTML = stats.map(s => `
+    <div class="stat-card">
+      <div class="stat-value">${s.avg_rating || '-'}</div>
+      <div class="stat-label">${s.platform} - ${s.location || 'All'} (${s.total} reviews)</div>
+    </div>
+  `).join('') || '<div class="stat-card"><div class="stat-value">-</div><div class="stat-label">No reviews yet</div></div>';
+
+  // Reviews list
+  const res = await fetch('/api/reviews?' + params);
+  const reviews = await res.json();
+  document.getElementById('reviews-list').innerHTML = reviews.map(r => `
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div>
+          <strong>${r.author || 'Anonymous'}</strong>
+          <span style="color:var(--text2); margin-left:8px;">${r.platform} &bull; ${r.location || ''} &bull; ${formatDate(r.review_date)}</span>
+        </div>
+        <div>${starsHTML(r.rating)}</div>
+      </div>
+      <p style="margin-bottom:8px;">${r.content || ''}</p>
+      ${r.responded ? `
+        <div style="background:var(--surface2); padding:12px; border-radius:6px; border-left:3px solid var(--accent); margin-top:8px;">
+          <small style="color:var(--accent);">Your Response:</small>
+          <p style="margin-top:4px;">${r.response}</p>
+        </div>
+      ` : `
+        <button class="btn btn-secondary btn-sm" onclick="showRespondModal('${r.id}', '${(r.content||'').replace(/'/g,"\\'")}', ${r.rating})">Respond</button>
+      `}
+    </div>
+  `).join('') || '<p style="color:var(--text2);">No reviews yet. Add reviews manually or connect a scraper.</p>';
+}
+
+function showReviewModal() {
+  document.getElementById('review-author').value = '';
+  document.getElementById('review-content').value = '';
+  document.getElementById('review-platform').value = 'google';
+  document.getElementById('review-rating').value = '5';
+  document.getElementById('review-location').value = '';
+  document.getElementById('review-date').value = '';
+  openModal('review-modal');
+}
+
+async function saveReview() {
+  const data = {
+    platform: document.getElementById('review-platform').value,
+    author: document.getElementById('review-author').value,
+    rating: parseInt(document.getElementById('review-rating').value),
+    content: document.getElementById('review-content').value,
+    location: document.getElementById('review-location').value,
+    review_date: document.getElementById('review-date').value || null,
+  };
+  await fetch('/api/reviews', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  closeModal('review-modal');
+  toast('Review added');
+  loadReviews();
+}
+
+function showRespondModal(id, content, rating) {
+  document.getElementById('respond-review-id').value = id;
+  document.getElementById('respond-review-preview').innerHTML = `
+    <div>${starsHTML(rating)}</div>
+    <p style="color:var(--text2); font-style:italic; margin-top:8px;">"${content}"</p>
+  `;
+  document.getElementById('respond-text').value = '';
+  openModal('respond-modal');
+}
+
+async function saveResponse() {
+  const id = document.getElementById('respond-review-id').value;
+  const response = document.getElementById('respond-text').value;
+  if (!response) return toast('Response required');
+  await fetch(`/api/reviews/${id}/respond`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ response }),
+  });
+  closeModal('respond-modal');
+  toast('Response saved');
+  loadReviews();
+}
+
+// ═══════════════════════════════════════════
+//  PROMOS
+// ═══════════════════════════════════════════
+let allPromos = [];
+
+async function loadPromos() {
+  const res = await fetch('/api/promos');
+  allPromos = await res.json();
+  document.getElementById('promos-table').innerHTML = allPromos.map(p => `
+    <tr>
+      <td>${p.name}</td>
+      <td><code style="background:var(--surface2); padding:2px 6px; border-radius:3px;">${p.code || '-'}</code></td>
+      <td>${p.type}</td>
+      <td>${p.value || '-'}</td>
+      <td>${p.start_date ? formatDate(p.start_date) : '-'} ${p.end_date ? '- ' + formatDate(p.end_date) : ''}</td>
+      <td>${p.current_uses}${p.max_uses ? '/' + p.max_uses : ''}</td>
+      <td>${p.active ? badgeHTML('active') : badgeHTML('inactive')}</td>
+      <td>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" onclick="editPromo('${p.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deletePromo('${p.id}')">Del</button>
+        </div>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--text2);">No promos yet</td></tr>';
+}
+
+function showPromoModal(promo = null) {
+  document.getElementById('promo-modal-title').textContent = promo ? 'Edit Promo' : 'Create Promo';
+  document.getElementById('promo-edit-id').value = promo?.id || '';
+  document.getElementById('promo-name').value = promo?.name || '';
+  document.getElementById('promo-code').value = promo?.code || '';
+  document.getElementById('promo-type').value = promo?.type || 'discount';
+  document.getElementById('promo-value').value = promo?.value || '';
+  document.getElementById('promo-description').value = promo?.description || '';
+  document.getElementById('promo-start').value = promo?.start_date?.split('T')[0] || '';
+  document.getElementById('promo-end').value = promo?.end_date?.split('T')[0] || '';
+  document.getElementById('promo-location').value = promo?.location || '';
+  document.getElementById('promo-maxuses').value = promo?.max_uses || '';
+  openModal('promo-modal');
+}
+
+function editPromo(id) {
+  const promo = allPromos.find(p => p.id === id);
+  if (promo) showPromoModal(promo);
+}
+
+async function savePromo() {
+  const id = document.getElementById('promo-edit-id').value;
+  const data = {
+    name: document.getElementById('promo-name').value,
+    code: document.getElementById('promo-code').value.toUpperCase(),
+    type: document.getElementById('promo-type').value,
+    value: document.getElementById('promo-value').value,
+    description: document.getElementById('promo-description').value,
+    start_date: document.getElementById('promo-start').value || null,
+    end_date: document.getElementById('promo-end').value || null,
+    location: document.getElementById('promo-location').value,
+    max_uses: document.getElementById('promo-maxuses').value ? parseInt(document.getElementById('promo-maxuses').value) : null,
+    active: true,
+  };
+  if (!data.name) return toast('Name required');
+  await fetch(id ? `/api/promos/${id}` : '/api/promos', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  closeModal('promo-modal');
+  toast('Promo saved');
+  loadPromos();
+}
+
+async function deletePromo(id) {
+  if (!confirm('Delete this promo?')) return;
+  await fetch(`/api/promos/${id}`, { method: 'DELETE' });
+  toast('Promo deleted');
+  loadPromos();
+}
+
+// ═══════════════════════════════════════════
+//  MILESTONES
+// ═══════════════════════════════════════════
+async function loadMilestones() {
+  const res = await fetch('/api/milestones/upcoming');
+  const data = await res.json();
+
+  document.getElementById('birthdays-table').innerHTML = (data.birthdays || []).map(m => {
+    const bday = new Date(m.birthday);
+    const display = bday.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    return `
+      <tr>
+        <td>${m.name}</td>
+        <td>${m.email}</td>
+        <td>${display}</td>
+        <td>${m.location || '-'}</td>
+        <td><button class="btn btn-secondary btn-sm" onclick="emailSingleMember('${m.email}','${m.name}')">Send Birthday Email</button></td>
+      </tr>
+    `;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text2);">No upcoming birthdays</td></tr>';
+
+  document.getElementById('anniversaries-table').innerHTML = (data.anniversaries || []).map(m => {
+    const jd = new Date(m.join_date);
+    const display = jd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    return `
+      <tr>
+        <td>${m.name}</td>
+        <td>${m.email}</td>
+        <td>${display}</td>
+        <td>${m.years} year(s)</td>
+        <td>${m.location || '-'}</td>
+        <td><button class="btn btn-secondary btn-sm" onclick="emailSingleMember('${m.email}','${m.name}')">Send Anniversary Email</button></td>
+      </tr>
+    `;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text2);">No upcoming anniversaries</td></tr>';
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+loadDashboard();
+</script>
+
+</body>
+</html>
